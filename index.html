@@ -2,21 +2,21 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial‑scale=1.0" />
   <title>OLITEL Onboarding</title>
-  <link rel="icon" href="logo-sm-64.png" type="image/png" />
+  <link rel="icon" href="logo‑sm‑64.png" type="image/png" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="web-files/bootstrap.min.css" />
+  <link rel="stylesheet" href="web‑files/bootstrap.min.css" />
   <style>
-    body { font-family: sans-serif; margin:0; background:#f5f5f5; }
-    header { background:#004b87; color:#fff; padding:1rem; text-align:center; }
-    main { max-width:400px; margin:2rem auto; background:#fff; padding:1.5rem;
-           border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.1); }
-    input, button { width:100%; padding:.75rem; margin-top:1rem; border-radius:4px;
-                    border:1px solid #ccc; font-size:1rem; }
+    body { font‑family: sans‑serif; margin:0; background:#f5f5f5; }
+    header { background:#004b87; color:#fff; padding:1rem; text‑align:center; }
+    main { max‑width:400px; margin:2rem auto; background:#fff; padding:1.5rem;
+           border‑radius:8px; box‑shadow:0 2px 8px rgba(0,0,0,.1); }
+    input, button { width:100%; padding:.75rem; margin‑top:1rem;
+                    border:1px solid #ccc; border‑radius:4px; font‑size:1rem; }
     button { background:#004b87; color:#fff; border:none; cursor:pointer; }
-    .card { margin-top:1.5rem; padding:1rem; border:1px solid #eee; border-radius:6px; }
-    .error { color:#c00; margin-top:1rem; }
+    .card { margin‑top:1.5rem; padding:1rem; border:1px solid #eee; border‑radius:6px; }
+    .error { color:#c00; margin‑top:1rem; }
   </style>
 </head>
 <body>
@@ -24,62 +24,99 @@
     <h1>OLITEL Onboarding</h1>
   </header>
   <main>
-    <p>Escanea tu QR o ingresa tu RUT:</p>
-    <input id="rut" type="text" placeholder="Ej: 12345678-9" />
-    <button id="go">Ver mi credencial</button>
-    <div id="resultado"></div>
+    <!-- Paso 1: Ingresar RUT -->
+    <section id="stepRut">
+      <p>Ingresa tu RUT (con guión):</p>
+      <input id="rut" placeholder="12345678-9" />
+      <button id="btnRut">Siguiente</button>
+      <div id="errRut" class="error"></div>
+    </section>
+
+    <!-- Paso 2: Ingresar Contraseña -->
+    <section id="stepPass" style="display:none;">
+      <p>Ingresa tu contraseña temporal:</p>
+      <input id="pass" type="password" placeholder="Tu contraseña" />
+      <button id="btnPass">Ver mis credenciales</button>
+      <div id="errPass" class="error"></div>
+    </section>
+
+    <!-- Paso 3: Mostrar Credenciales -->
+    <section id="stepResult" style="display:none;">
+      <div class="card">
+        <h3 id="nombreUsuario"></h3>
+        <p><strong>Correo:</strong> <span id="correoUsuario"></span></p>
+        <p><strong>Contraseña:</strong> <span id="claveUsuario"></span></p>
+      </div>
+    </section>
   </main>
 
   <script>
-    (async () => {
-      // 1) Carga el JSON con todos los datos
-      const datos = await fetch('datos.json').then(res => res.json());
+  (async () => {
+    // 1) Carga el JSON con todos los datos
+    const datos = await fetch('datos.json').then(r => r.json());
 
-      const input = document.getElementById('rut');
-      const btn   = document.getElementById('go');
-      const out   = document.getElementById('resultado');
+    const rutInput    = document.getElementById('rut');
+    const btnRut      = document.getElementById('btnRut');
+    const errRut      = document.getElementById('errRut');
 
-      // 2) Si llega ?id= en la URL, auto‑llenar y buscar
-      const params = new URLSearchParams(window.location.search);
-      if (params.has('id')) {
-        input.value = params.get('id');
-        buscar();
+    const passInput   = document.getElementById('pass');
+    const btnPass     = document.getElementById('btnPass');
+    const errPass     = document.getElementById('errPass');
+
+    const nombreEl    = document.getElementById('nombreUsuario');
+    const correoEl    = document.getElementById('correoUsuario');
+    const claveEl     = document.getElementById('claveUsuario');
+
+    let currentUser = null;
+
+    // Paso 1 → valida RUT
+    btnRut.addEventListener('click', () => {
+      errRut.textContent = '';
+      const raw = rutInput.value.trim();
+      if (!raw.match(/^\d+\-\w$/)) {
+        errRut.textContent = 'Formato de RUT inválido. Usa “12345678-9”';
+        return;
+      }
+      // limpia puntos y guión, reconstruye con guión
+      const clean = raw.replace(/[.\-]/g,'');
+      const dv    = clean.slice(-1), num = clean.slice(0,-1);
+      const key   = `${num}-${dv}`;
+
+      if (!datos[key]) {
+        errRut.textContent = 'RUT no encontrado.';
+        return;
+      }
+      currentUser = datos[key];
+
+      // ocultar paso Rut / mostrar paso Pass
+      document.getElementById('stepRut').style.display  = 'none';
+      document.getElementById('stepPass').style.display = 'block';
+    });
+
+    // Paso 2 → valida contraseña
+    btnPass.addEventListener('click', () => {
+      errPass.textContent = '';
+      if (!currentUser) return;
+
+      const entered = passInput.value.trim();
+      if (entered === '') {
+        errPass.textContent = 'Debes ingresar tu contraseña.';
+        return;
+      }
+      if (entered !== currentUser.clave) {
+        errPass.textContent = 'Contraseña incorrecta.';
+        return;
       }
 
-      btn.addEventListener('click', buscar);
+      // todo OK: muestra credenciales
+      nombreEl.textContent = currentUser.nombre;
+      correoEl.textContent = currentUser.correo;
+      claveEl.textContent  = currentUser.clave;
 
-      function buscar() {
-        out.innerHTML = '';
-        let raw = input.value.trim();
-        if (!raw) {
-          out.innerHTML = '<p class="error">Ingresa un RUT válido.</p>';
-          return;
-        }
-        // Limpia puntos y guión
-        const clean = raw.replace(/[.\-]/g, '');
-        // Reconstruye con guión
-        if (clean.length < 2) {
-          out.innerHTML = '<p class="error">RUT demasiado corto.</p>';
-          return;
-        }
-        const dv = clean.slice(-1), num = clean.slice(0, -1);
-        const key = `${num}-${dv}`;
-
-        const u = datos[key];
-        if (!u) {
-          out.innerHTML = '<p class="error">RUT no encontrado.</p>';
-          return;
-        }
-
-        out.innerHTML = `
-          <div class="card">
-            <h3>${u.nombre}</h3>
-            <p><strong>Correo:</strong> ${u.correo}</p>
-            <p><strong>Clave:</strong> ${u.clave}</p>
-          </div>
-        `;
-      }
-    })();
+      document.getElementById('stepPass').style.display   = 'none';
+      document.getElementById('stepResult').style.display = 'block';
+    });
+  })();
   </script>
 </body>
 </html>
