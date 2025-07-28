@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
-<base href="/onboarding-olitel/" /> 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial‑scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>OLITEL Onboarding</title>
 
-  <!-- Bootstrap 5 -->
+  <!-- Bootstrap 5 CSS -->
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
     rel="stylesheet"
@@ -16,8 +15,6 @@
     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
     rel="stylesheet"
   />
-
-  <link rel="icon" href="logo‑sm‑64.png" type="image/png" />
 
   <style>
     :root {
@@ -148,7 +145,7 @@
     </div>
   </main>
 
-  <!-- JS original (el que estaba funcionando) -->
+  <!-- JS original (con fetch('./datos.json')) -->
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       const rutInput  = document.getElementById('rut');
@@ -162,12 +159,12 @@
 
       let datos = {};
       try {
-        const res = await fetch('datos.json');
+        const res = await fetch('./datos.json');
         if (!res.ok) throw new Error(res.statusText);
         datos = await res.json();
       } catch (e) {
         errRut.textContent = 'Error interno, inténtalo más tarde.';
-        console.error(e);
+        console.error('Fetch fallido:', e);
         return;
       }
 
