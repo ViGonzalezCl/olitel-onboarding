@@ -4,100 +4,186 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>OLITEL Onboarding</title>
-  <link rel="stylesheet" href="web-files/bootstrap.min.css" />
+
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <!-- Bootstrap Icons -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    rel="stylesheet"
+  />
+
+  <link rel="icon" href="logo-sm-64.png" type="image/png" />
+
   <style>
-    body { font-family:sans-serif; margin:0; background:#f5f5f5; }
-    header { background:#004b87; color:#fff; padding:1rem; text-align:center; }
-    main { max-width:400px; margin:2rem auto; background:#fff; padding:1.5rem;
-           border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.1); }
-    input,button { width:100%; padding:.75rem; margin-top:1rem;
-                   border:1px solid #ccc; border-radius:4px; font-size:1rem; }
-    button { background:#004b87; color:#fff; border:none; cursor:pointer; }
-    .card { margin-top:1.5rem; padding:1rem; border:1px solid #eee; border-radius:6px; }
-    .error { color:#c00; margin-top:1rem; }
+    :root {
+      --brand-color: #004b87;
+    }
+
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+    }
+    header {
+      background: var(--brand-color);
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+    }
+    main {
+      padding: 2rem 1rem;
+    }
+    .input-card {
+      max-width: 400px;
+      margin: 0 auto;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      background: #fff;
+    }
+    .input-card .card-body {
+      padding: 2rem;
+    }
+    .cred-card {
+      max-width: 400px;
+      margin: 2rem auto 0;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    .cred-card .card-header {
+      background: var(--brand-color);
+      color: #fff;
+      border-bottom: none;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+    .cred-card .card-body {
+      padding: 1.5rem;
+    }
+    .cred-icon {
+      font-size: 1.75rem;
+      color: var(--brand-color);
+    }
+    .error {
+      color: #c00;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
-  <header><h1>OLITEL Onboarding</h1></header>
-  <main>
-    <section id="stepRut">
-      <p>Ingresa tu RUT (con guión):</p>
-      <input id="rut" placeholder="12345678-9" />
-      <button id="btnRut">Siguiente</button>
-      <div id="errRut" class="error"></div>
-    </section>
+  <header>
+    <img src="https://i.postimg.cc/xT2KG8gS/Dise-o-sin-t-tulo-7.png"
+         alt="OLITEL"
+         class="mx-auto d-block" />
+    <span class="fs-4">Bienvenida/o a Olitel</span>
+  </header>
 
-    <section id="stepResult" style="display:none;">
-      <div class="card">
-        <h3 id="nombreUsuario"></h3>
-        <p><strong>Correo:</strong> <span id="correoUsuario"></span></p>
-        <p><strong>Contraseña:</strong> <span id="claveUsuario"></span></p>
+  <main>
+    <!-- Paso 1: Ingreso de RUT -->
+    <div id="stepRut" class="card input-card">
+      <div class="card-body">
+        <label for="rut" class="form-label">Ingresa tu RUT (con guión):</label>
+        <input id="rut" type="text" class="form-control" placeholder="12345678-9" />
+        <div id="errRut" class="error"></div>
+        <button id="btnRut" class="btn btn-primary w-100 mt-3">Siguiente</button>
+      </div>
+    </div>
+
+    <!-- Paso 2: Mostrar Credenciales -->
+    <section id="stepResult" class="card cred-card" style="display:none;">
+      <div class="card-header d-flex align-items-center">
+        <i class="bi bi-shield-lock-fill me-2"></i>
+        <h5 class="mb-0">Tus credenciales</h5>
+      </div>
+      <div class="card-body">
+        <!-- Nombre -->
+        <div class="d-flex align-items-center mb-3">
+          <i class="bi bi-person-fill cred-icon me-3"></i>
+          <div>
+            <small class="text-muted">Nombre completo</small>
+            <div id="nombreUsuario" class="fw-semibold fs-5"></div>
+          </div>
+        </div>
+        <!-- Correo -->
+        <div class="d-flex align-items-center mb-3">
+          <i class="bi bi-envelope-fill cred-icon me-3"></i>
+          <div>
+            <small class="text-muted">Correo corporativo</small>
+            <div id="correoUsuario" class="fw-semibold"></div>
+          </div>
+        </div>
+        <!-- Contraseña -->
+        <div class="d-flex align-items-center">
+          <i class="bi bi-key-fill cred-icon me-3"></i>
+          <div>
+            <small class="text-muted">Contraseña</small>
+            <div id="claveUsuario" class="fw-semibold"></div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
 
   <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const rutInput  = document.getElementById('rut');
-    const btnRut    = document.getElementById('btnRut');
-    const errRut    = document.getElementById('errRut');
-    const stepRut   = document.getElementById('stepRut');
-    const stepRes   = document.getElementById('stepResult');
-    const nombreEl  = document.getElementById('nombreUsuario');
-    const correoEl  = document.getElementById('correoUsuario');
-    const claveEl   = document.getElementById('claveUsuario');
+    document.addEventListener('DOMContentLoaded', async () => {
+      const rutInput  = document.getElementById('rut');
+      const btnRut    = document.getElementById('btnRut');
+      const errRut    = document.getElementById('errRut');
+      const stepRut   = document.getElementById('stepRut');
+      const stepRes   = document.getElementById('stepResult');
+      const nombreEl  = document.getElementById('nombreUsuario');
+      const correoEl  = document.getElementById('correoUsuario');
+      const claveEl   = document.getElementById('claveUsuario');
 
-    // 1) Carga JSON
-    fetch('datos.json')
-      .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok');
-        return res.json();
-      })
-      .then(datos => {
-        console.log('Datos.json cargado:', datos);
-
-        // 2) Añade el listener SOLO después de tener los datos
-        btnRut.addEventListener('click', function() {
-          errRut.textContent = '';
-          const raw = rutInput.value.trim();
-          console.log('Raw RUT ingresado:', raw);
-          if (!raw) {
-            errRut.textContent = 'Debes ingresar tu RUT.';
-            return;
-          }
-
-          const clean = raw.replace(/[.\-]/g, '');
-          console.log('RUT limpio:', clean);
-          if (clean.length < 2) {
-            errRut.textContent = 'RUT demasiado corto.';
-            return;
-          }
-
-          const dv  = clean.slice(-1);
-          const num = clean.slice(0, -1);
-          const key = `${num}-${dv}`;
-          console.log('Buscando clave:', key);
-
-          const u = datos[key];
-          if (!u) {
-            errRut.textContent = 'RUT no encontrado.';
-            return;
-          }
-
-          // Mostrar resultado
-          nombreEl.textContent = u.nombre;
-          correoEl.textContent = u.correo;
-          claveEl.textContent  = u.contraseña;
-
-          stepRut.style.display  = 'none';
-          stepRes.style.display  = 'block';
-        });
-      })
-      .catch(err => {
-        console.error('Error cargando datos.json:', err);
+      let datos = {};
+      try {
+        const res = await fetch('datos.json');
+        if (!res.ok) throw new Error(res.statusText);
+        datos = await res.json();
+      } catch (e) {
         errRut.textContent = 'Error interno, inténtalo más tarde.';
+        console.error(e);
+        return;
+      }
+
+      btnRut.addEventListener('click', () => {
+        errRut.textContent = '';
+        const raw = rutInput.value.trim();
+        if (!raw) {
+          errRut.textContent = 'Debes ingresar tu RUT.';
+          return;
+        }
+
+        const clean = raw.replace(/[.\-]/g, '');
+        if (clean.length < 2) {
+          errRut.textContent = 'RUT demasiado corto.';
+          return;
+        }
+
+        const dv  = clean.slice(-1);
+        const num = clean.slice(0, -1);
+        const key = `${num}-${dv}`;
+
+        const u = datos[key];
+        if (!u) {
+          errRut.textContent = 'RUT no encontrado.';
+          return;
+        }
+
+        nombreEl.textContent = u.nombre;
+        correoEl.textContent = u.correo;
+        claveEl.textContent  = u.contraseña;
+
+        stepRut.style.display = 'none';
+        stepRes.style.display = 'block';
       });
-  });
+    });
   </script>
 </body>
 </html>
